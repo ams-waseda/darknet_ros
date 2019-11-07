@@ -108,6 +108,12 @@ class YoloObjectDetector
   void cameraCallback(const sensor_msgs::ImageConstPtr& msg);
 
   /*!
+   * Callback of depth.
+   * @param[in] msg image pointer.
+   */
+  void depthCallback(const sensor_msgs::Image::ConstPtr& msg);
+
+  /*!
    * Check for objects action goal callback.
    */
   void checkForObjectsActionGoalCB();
@@ -148,6 +154,7 @@ class YoloObjectDetector
 
   //! ROS subscriber and publisher.
   image_transport::Subscriber imageSubscriber_;
+  image_transport::Subscriber depthSubscriber_;
   ros::Publisher objectPublisher_;
   ros::Publisher boundingBoxesPublisher_;
 
@@ -159,6 +166,7 @@ class YoloObjectDetector
   //! Camera related parameters.
   int frameWidth_;
   int frameHeight_;
+  float* frameDepth_;
 
   //! Publisher of the bounding box image.
   ros::Publisher detectionImagePublisher_;

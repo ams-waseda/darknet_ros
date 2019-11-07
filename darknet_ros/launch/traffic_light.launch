@@ -5,12 +5,14 @@
   <!-- Use YOLOv3 -->
   <arg name="network_param_file"         default="$(find darknet_ros)/config/traffic_light.yaml"/>
   <arg name="image" default="/zed/zed_node/rgb_raw/image_raw_color" />
+  <arg name="depth" default="/zed/zed_node/depth/depth_registered" />
 
 
   <!-- Include main launch file -->
   <include file="$(find darknet_ros)/launch/darknet_ros.launch">
     <arg name="network_param_file"    value="$(arg network_param_file)"/>
     <arg name="image" value="$(arg image)" />
+    <arg name="depth" value="$(arg depth)" />
   </include>
 
 </launch>

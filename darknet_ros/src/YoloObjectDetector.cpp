@@ -128,6 +128,7 @@ void YoloObjectDetector::init()
 
   // Initialize publisher and subscriber.
   std::string cameraTopicName;
+  std::string depthTopicName;
   int cameraQueueSize;
   std::string objectDetectorTopicName;
   int objectDetectorQueueSize;
@@ -141,6 +142,8 @@ void YoloObjectDetector::init()
 
   nodeHandle_.param("subscribers/camera_reading/topic", cameraTopicName,
                     std::string("/camera/image_raw"));
+  nodeHandle_.param("subscribers/depth_reading/topic", depthTopicName,
+                    std::string("/camera/depth"));
   nodeHandle_.param("subscribers/camera_reading/queue_size", cameraQueueSize, 1);
   nodeHandle_.param("publishers/object_detector/topic", objectDetectorTopicName,
                     std::string("found_object"));
@@ -157,6 +160,8 @@ void YoloObjectDetector::init()
 
   imageSubscriber_ = imageTransport_.subscribe(cameraTopicName, cameraQueueSize,
                                                &YoloObjectDetector::cameraCallback, this);
+  depthSubscriber_ = imageTransport_.subscribe(depthTopicName, cameraQueueSize,
+                                               &YoloObjectDetector::depthCallback, this);
   objectPublisher_ = nodeHandle_.advertise<std_msgs::Int8>(objectDetectorTopicName,
                                                            objectDetectorQueueSize,
                                                            objectDetectorLatch);
@@ -205,6 +210,13 @@ void YoloObjectDetector::cameraCallback(const sensor_msgs::ImageConstPtr& msg)
     frameWidth_ = cam_image->image.size().width;
     frameHeight_ = cam_image->image.size().height;
   }
+  return;
+}
+
+void YoloObjectDetector::depthCallback(const sensor_msgs::Image::ConstPtr& msg)
+{
+  ROS_DEBUG("[YoloObjectDetector] depth image received.");
+  frameDepth_ = (float*)(&msg->data[0]);
   return;
 }
 
@@ -620,6 +632,7 @@ void *YoloObjectDetector::publishInThread()
           boundingBox.ymin = ymin;
           boundingBox.xmax = xmax;
           boundingBox.ymax = ymax;
+          boundingBox.distance = frameDepth_[(xmax - xmin) / 2 + (ymax - ymin) / 2 * frameWidth_];
           boundingBoxesResults_.bounding_boxes.push_back(boundingBox);
         }
       }
